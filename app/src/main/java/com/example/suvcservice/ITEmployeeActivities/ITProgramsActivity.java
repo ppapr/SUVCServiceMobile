@@ -5,10 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.suvcservice.Adapters.ProgramsAdapter;
 import com.example.suvcservice.CommonComponents.DataProvider;
@@ -41,8 +44,16 @@ public class ITProgramsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_itprograms);
 
-        currentSpecialization = getIntent().getParcelableExtra("Specialization");
+        ImageView btnArrow = findViewById(R.id.imageArrow);
+        btnArrow.setOnClickListener(view -> {
+            Intent intent = new Intent(ITProgramsActivity.this, ITSpecializationsActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
+        currentSpecialization = getIntent().getParcelableExtra("Specialization");
+        TextView tvCurrentSpecialization = findViewById(R.id.textViewCurrentSpecialization);
+        tvCurrentSpecialization.setText(currentSpecialization.getNameSpecialization());
         ListView lvPrograms = findViewById(R.id.listPrograms);
         mPrograms = new ArrayList<>();
         mProgramsAdapter = new ProgramsAdapter(ITProgramsActivity.this, mPrograms);

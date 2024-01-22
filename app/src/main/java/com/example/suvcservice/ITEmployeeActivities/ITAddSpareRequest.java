@@ -43,6 +43,7 @@ public class ITAddSpareRequest extends AppCompatActivity {
         btnArrow.setOnClickListener(view -> {
             Intent intent = new Intent(ITAddSpareRequest.this, ITCurrentRequestActivity.class);
             startActivity(intent);
+            finish();
         });
 
         currentRequest = getIntent().getParcelableExtra("Request");

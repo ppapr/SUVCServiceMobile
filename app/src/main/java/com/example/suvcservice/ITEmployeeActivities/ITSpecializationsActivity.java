@@ -49,15 +49,11 @@ public class ITSpecializationsActivity extends AppCompatActivity {
         btnStartRequests.setOnClickListener(view -> {
             Intent intent = new Intent(ITSpecializationsActivity.this, ITRequestActivity.class);
             startActivity(intent);
+            finish();
         });
         LinearLayout btnStartProfile = findViewById(R.id.btnProfilePage);
         btnStartProfile.setOnClickListener(view -> {
             Intent intent = new Intent(ITSpecializationsActivity.this, ITProfileActivity.class);
-            startActivity(intent);
-        });
-        ImageView btnArrow = findViewById(R.id.imageArrow);
-        btnArrow.setOnClickListener(view -> {
-            Intent intent = new Intent(ITSpecializationsActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         });

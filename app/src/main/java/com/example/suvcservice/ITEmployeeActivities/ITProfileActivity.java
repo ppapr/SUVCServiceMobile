@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.suvcservice.Adapters.RequestsAdapter;
 import com.example.suvcservice.CommonComponents.DataProvider;
+import com.example.suvcservice.CommonEmployeeActivities.CProfileActivity;
 import com.example.suvcservice.MainActivity;
 import com.example.suvcservice.Objects.Requests;
 import com.example.suvcservice.Objects.Users;
@@ -72,17 +73,24 @@ public class ITProfileActivity extends AppCompatActivity {
         btnStartRequests.setOnClickListener(view -> {
             Intent intent = new Intent(ITProfileActivity.this, ITRequestActivity.class);
             startActivity(intent);
+            finish();
         });
         LinearLayout btnStartPrograms = findViewById(R.id.btnProgramsPage);
         btnStartPrograms.setOnClickListener(view -> {
             Intent intent = new Intent(ITProfileActivity.this, ITSpecializationsActivity.class);
             startActivity(intent);
-        });
-        ImageView btnArrow = findViewById(R.id.imageArrow);
-        btnArrow.setOnClickListener(view -> {
-            Intent intent = new Intent(ITProfileActivity.this, MainActivity.class);
-            startActivity(intent);
             finish();
+        });
+        Button btnLogoff = findViewById(R.id.buttonLogoff);
+        btnLogoff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Users.logoutUser(ITProfileActivity.this);
+                Users.saveAuthenticationState(ITProfileActivity.this, false);
+                Intent intent = new Intent(ITProfileActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
         });
         String connapi = getString(R.string.api_link);
         ListView lvRequests = findViewById(R.id.listRequests);

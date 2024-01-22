@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.suvcservice.CommonEmployeeActivities.CRequestsActivity;
 import com.example.suvcservice.Objects.Requests;
 import com.example.suvcservice.Objects.Users;
 import com.example.suvcservice.R;
@@ -46,10 +47,6 @@ public class ITCurrentRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_itcurrent_request);
         ImageView btnArrow = findViewById(R.id.imageArrow);
-        btnArrow.setOnClickListener(view -> {
-            Intent intent = new Intent(ITCurrentRequestActivity.this, ITRequestActivity.class);
-            startActivity(intent);
-        });
         currentRequest = getIntent().getParcelableExtra("Request");
 
         EditText txtDateRequest = findViewById(R.id.textDateRequest);
@@ -103,6 +100,18 @@ public class ITCurrentRequestActivity extends AppCompatActivity {
         if(Users.user.getIDRole() == 3){
             btnActionRequest.setVisibility(View.INVISIBLE);
             btnAddSpare.setVisibility(View.INVISIBLE);
+            btnArrow.setOnClickListener(view -> {
+                Intent intent = new Intent(ITCurrentRequestActivity.this, CRequestsActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        }
+        else{
+            btnArrow.setOnClickListener(view -> {
+                Intent intent = new Intent(ITCurrentRequestActivity.this, ITRequestActivity.class);
+                startActivity(intent);
+                finish();
+            });
         }
 
         btnActionRequest.setOnClickListener(new View.OnClickListener() {
@@ -241,6 +250,7 @@ public class ITCurrentRequestActivity extends AppCompatActivity {
                 Toast.makeText(mContext, "Статус заявки успешно обновлен!", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(ITCurrentRequestActivity.this, ITRequestActivity.class);
                 startActivity(intent);
+                finish();
             }
         }
     }

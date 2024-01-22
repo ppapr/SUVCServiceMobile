@@ -46,17 +46,11 @@ public class CRequestsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crequests);
 
-        ImageView btnArrow = findViewById(R.id.imageArrow);
-        btnArrow.setOnClickListener(view -> {
-            Intent intent = new Intent(CRequestsActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        });
-
         LinearLayout btnStartProfile = findViewById(R.id.buttonStartProfile);
         btnStartProfile.setOnClickListener(view -> {
             Intent intent = new Intent(CRequestsActivity.this, CProfileActivity.class);
             startActivity(intent);
+            finish();
         });
 
         TextView txtName = findViewById(R.id.textViewCurrentUser);
@@ -82,6 +76,7 @@ public class CRequestsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(CRequestsActivity.this, CAddRequestActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }

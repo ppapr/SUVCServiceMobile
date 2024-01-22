@@ -61,6 +61,7 @@ public class CAddRequestActivity extends AppCompatActivity {
         btnArrow.setOnClickListener(view -> {
             Intent intent = new Intent(CAddRequestActivity.this, CRequestsActivity.class);
             startActivity(intent);
+            finish();
         });
 
         TextView txtName = findViewById(R.id.textViewCurrentUser);

@@ -35,18 +35,39 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button btnAuthorization = findViewById(R.id.buttonAuthorization);
-        btnAuthorization.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText loginText = findViewById(R.id.textLogin);
-                EditText passwordText = findViewById(R.id.textPassword);
-                String login = loginText.getText().toString();
-                String password = passwordText.getText().toString();
-                new authorizationUser(MainActivity.this).execute(getString(R.string.api_link)
-                        + "api/Users",login,password);
+        boolean isAuthenticated = Users.loadAuthenticationState(this);
+//        boolean isAuthenticated = false;
+
+        if (isAuthenticated) {
+            Users.loadSystemBasket(this);
+            if (Users.checkUser()) {
+                int idRole = Users.user.getIDRole();
+                if (idRole == 2) {
+                    Intent intent = new Intent(MainActivity.this, ITRequestActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else if (idRole == 3) {
+                    Intent intent = new Intent(MainActivity.this, CRequestsActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
             }
-        });
+        } else {
+
+            btnAuthorization.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EditText loginText = findViewById(R.id.textLogin);
+                    EditText passwordText = findViewById(R.id.textPassword);
+                    String login = loginText.getText().toString();
+                    String password = passwordText.getText().toString();
+                    new authorizationUser(MainActivity.this).execute(getString(R.string.api_link)
+                            + "api/Users", login, password);
+                }
+            });
+        }
     }
+
     private class authorizationUser extends AsyncTask<String, Void, String> {
 
         private Context mContext;
@@ -107,8 +128,8 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONObject jsonObjectUser = new JSONObject(result);
                     int id = jsonObjectUser.getInt("ID");
-                    int idRole =jsonObjectUser.getInt("IDRole");
-                    if (id!=0) {
+                    int idRole = jsonObjectUser.getInt("IDRole");
+                    if (id != 0) {
                         Users.user = new Users(
                                 id,
                                 jsonObjectUser.getString("Name"),
@@ -119,26 +140,27 @@ public class MainActivity extends AppCompatActivity {
                                 idRole
                         );
                         Users.saveSystemBasket(MainActivity.this);
-                        if (idRole == 2){
-                        Intent intent = new Intent(MainActivity.this, ITRequestActivity.class);
-                        startActivity(intent);
-                        }
-                        else if (idRole == 3){
+                        Users.saveAuthenticationState(MainActivity.this, true);
+                        if (idRole == 2) {
+                            Intent intent = new Intent(MainActivity.this, ITRequestActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else if (idRole == 3) {
                             Intent intent = new Intent(MainActivity.this, CRequestsActivity.class);
                             startActivity(intent);
+                            finish();
                         }
-                    }
-                    else {
-                        Toast.makeText(MainActivity.this, "Неверный логин или пароль",Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Неверный логин или пароль", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(MainActivity.this, "Неверный логин или пароль",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Неверный логин или пароль", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(MainActivity.this, "Неверный логин или пароль",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Неверный логин или пароль", Toast.LENGTH_LONG).show();
             }
-            if (mProgressDialog.isShowing()){
+            if (mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
                 Toast.makeText(MainActivity.this, "Успешная авторизация!", Toast.LENGTH_SHORT).show();
             }

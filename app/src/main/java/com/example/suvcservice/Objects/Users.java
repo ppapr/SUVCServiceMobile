@@ -49,6 +49,17 @@ public class Users {
                 sharedPreferences.getInt("IDRole", 0));
     }
 
+    public static void saveAuthenticationState(Context context, boolean isAuthenticated) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("SaveSettings", Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+        sharedPreferencesEditor.putBoolean("IsAuthenticated", isAuthenticated).apply();
+    }
+
+    public static boolean loadAuthenticationState(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("SaveSettings", Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean("IsAuthenticated", false);
+    }
+
     public static void logoutUser(Context context){
         user = new Users(
                 0,
