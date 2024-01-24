@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -86,6 +87,10 @@ public class ITProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Users.logoutUser(ITProfileActivity.this);
+                SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.clear();
+                editor.apply();
                 Users.saveAuthenticationState(ITProfileActivity.this, false);
                 Intent intent = new Intent(ITProfileActivity.this, MainActivity.class);
                 startActivity(intent);

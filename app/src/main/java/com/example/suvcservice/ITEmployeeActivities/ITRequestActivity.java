@@ -1,53 +1,34 @@
 package com.example.suvcservice.ITEmployeeActivities;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.widget.ImageView;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.suvcservice.Adapters.RequestsAdapter;
-import com.example.suvcservice.CommonComponents.ApiCheckService;
-import com.example.suvcservice.CommonComponents.DataProvider;
 import com.example.suvcservice.CommonComponents.GetRequest;
-import com.example.suvcservice.MainActivity;
+import com.example.suvcservice.CommonComponents.NotificationService;
+import com.example.suvcservice.CommonComponents.OnDataUpdateListener;
 import com.example.suvcservice.Objects.Requests;
 import com.example.suvcservice.Objects.Users;
 import com.example.suvcservice.R;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ITRequestActivity extends AppCompatActivity {
+public class ITRequestActivity extends AppCompatActivity implements OnDataUpdateListener {
 
     private ProgressDialog mProgressDialog;
+    ListView lvRequests;
+    private List<Requests> mRequests;
+    private RequestsAdapter mRequestAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,14 +37,19 @@ public class ITRequestActivity extends AppCompatActivity {
         TextView txtName = findViewById(R.id.textViewCurrentUser);
         txtName.setText(Users.user.getSurname() + " " + Users.user.getName() + " " + Users.user.getMiddleName());
 
-        ListView lvRequests = findViewById(R.id.listRequests);
+        lvRequests = findViewById(R.id.listRequests);
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Загрузка данных...");
         mProgressDialog.setCancelable(false);
 
+        mRequests = new ArrayList<>();
+        mRequestAdapter = new RequestsAdapter(this, mRequests);
+
+        lvRequests.setAdapter(mRequestAdapter);
         String connapi = getString(R.string.api_link);
-        new GetRequest(ITRequestActivity.this, lvRequests, mProgressDialog).execute(connapi + "api/Requests",
+        new GetRequest(ITRequestActivity.this, lvRequests, mProgressDialog, ITRequestActivity.this)
+                .execute(connapi + "api/Requests",
                 String.valueOf(Users.user.getId()));
 
         LinearLayout btnStartPrograms = findViewById(R.id.btnProgramsPage);
@@ -78,7 +64,16 @@ public class ITRequestActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
-        Intent serviceIntent = new Intent(this, ApiCheckService.class);
+        Intent serviceIntent = new Intent(this, NotificationService.class);
         startService(serviceIntent);
+    }
+
+    @Override
+    public void onDataUpdated(List<Requests> updatedData) {
+        Log.d("ITRequestActivity", "onDataUpdated: Data updated. Size: " + updatedData.size());
+        // Обновление ListView с новыми данными
+        mRequests.clear();
+        mRequests.addAll(updatedData);
+        mRequestAdapter.notifyDataSetChanged();
     }
 }
