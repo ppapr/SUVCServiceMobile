@@ -1,6 +1,8 @@
 package com.example.suvcservice.CommonComponents;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -9,11 +11,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.ListView;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.suvcservice.Adapters.RequestsAdapter;
 import com.example.suvcservice.ITEmployeeActivities.ITRequestActivity;
@@ -42,7 +47,6 @@ public class GetRequest extends AsyncTask<String, Void, String> {
     private RequestsAdapter mRequestAdapter;
     private List<Requests> mRequests;
     private ListView mListView;
-    private OnDataUpdateListener onDataUpdateListener;
 
 
     public GetRequest(Context context, ListView listView, ProgressDialog progressDialog) {
@@ -51,12 +55,12 @@ public class GetRequest extends AsyncTask<String, Void, String> {
         mProgressDialog = progressDialog;
     }
 
-    public GetRequest(Context context, ListView listView, ProgressDialog progressDialog, OnDataUpdateListener listener) {
+    public GetRequest(Context context, ListView listView) {
         mContext = context;
         mListView = listView;
-        mProgressDialog = progressDialog;
-        onDataUpdateListener = listener;
     }
+
+
     public GetRequest(Context context) {
         mContext = context;
     }
@@ -133,23 +137,20 @@ public class GetRequest extends AsyncTask<String, Void, String> {
                             jsonObjectRequest.getInt("IDUserRequest"),
                             jsonObjectRequest.getInt("IDExecutorRequest")
                     );
-                    if (request.getIDStatus() != 3 && !isRequestProcessed(request.getID())) {
+                    if (request.getIDStatus() != 3) {
+                        if (!isRequestProcessed(request.getID())) {
+                            sendNotification("Новая заявка", "Заявка от: " + request.getUserRequestName());
+                            Intent onDataUpdatedIntent = new Intent("IT_REQUEST_ACTIVITY_DATA_UPDATED");
+                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(onDataUpdatedIntent);
+                        }
                         mRequests.add(request);
                         markRequestAsProcessed(request.getID());
-                        updatedData.add(request);
-                        Log.d("GetRequest", "New request added. Sending notification.");
-                        sendNotification("Новая заявка", "Поступила новая заявка");
+                        // }
                     } else {
                         Log.d("GetRequest", "Request already processed or has status 3.");
                     }
                 }
                 mRequestAdapter.notifyDataSetChanged();
-                if (onDataUpdateListener != null) {
-                    // Вызовите onDataUpdated на главном потоке
-                    ((Activity) mContext).runOnUiThread(() -> {
-                        onDataUpdateListener.onDataUpdated(updatedData);
-                    });
-                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -162,6 +163,7 @@ public class GetRequest extends AsyncTask<String, Void, String> {
             });
         }
     }
+
     private boolean isRequestProcessed(int requestId) {
         SharedPreferences preferences = mContext.getSharedPreferences("ProcessedRequests", Context.MODE_PRIVATE);
         Set<String> processedRequests = preferences.getStringSet("processed_requests", new HashSet<>());
@@ -176,20 +178,24 @@ public class GetRequest extends AsyncTask<String, Void, String> {
         editor.putStringSet("processed_requests", processedRequests);
         editor.apply();
     }
+
     private void sendNotification(String title, String message) {
-        Log.d("NotificationService", "Sending notification: " + title + " - " + message);
+        Log.d("GetRequest", "Sending notification: " + title + " - " + message);
+        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("default_channel_id", "Default Channel", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
         Intent notificationIntent = new Intent(mContext, ITRequestActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, PendingIntent.FLAG_ONE_SHOT);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mContext)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mContext, "default_channel_id")
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_arrow_left)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
-
-        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notificationBuilder.build());
+        Notification notification = notificationBuilder.build();
+        notificationManager.notify(0, notification);
     }
 }

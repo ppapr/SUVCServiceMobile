@@ -3,8 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -92,7 +95,8 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-        <service android:name=".CommonComponents.NotificationService" />
+        <service android:name=".CommonComponents.NotificationService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
     </application>
 
 
